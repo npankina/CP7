@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block title %}Админ Панель - Товары{% endblock %}
+
+{% block content %}
+<div class="main-container">
+    <h1>Товары</h1>
+
+    <!-- Кнопка для вызова модального окна добавления нового товара -->
+    <button id="add-product-btn" class="add-product-btn">Добавить новый товар</button>
+
+    <!-- Модальное окно для редактирования товара -->
+    <div id="edit-product-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2>Редактировать товар</h2>
+            <form id="edit-product-form" action="/admin/products/edit" method="POST" enctype="multipart/form-data">
+                <input type="hidden" id="edit-id" name="id">
+
+                <label for="edit-name">Название:</label>
+                <input type="text" id="edit-name" name="name" required>
+
+                <label for="edit-category">Категория:</label>
+                <input type="text" id="edit-category" name="category" required>
+
+                <label for="edit-description">Описание:</label>
+                <textarea id="edit-description" name="description" required></textarea>
+
+                <label for="edit-price">Цена:</label>
+                <input type="number" id="edit-price" name="price" required>
+
+                <label for="edit-stock">В наличии:</label>
+                <input type="number" id="edit-stock" name="stock" required>
+
+                <label for="edit-image">Изображение:</label>
+                <input type="file" id="edit-image" name="image" accept="image/*">
+
+                <button type="submit" class="submit-btn">Сохранить</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Таблица товаров -->
+    <div class="table-container ">
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>Изображение</th>
+                <th>Название</th>
+                <th>Категория</th>
+                <th>Описание</th>
+                <th>Цена</th>
+                <th>В наличии</th>
+                <th>Действия</th>
+            </tr>
+            {% for product in products %}
+            <tr>
+                <td>{{ product.id }}</td>
+                <td>
+                    <img src="{{ url_for('static', filename='images/' + product.image) }}" alt="{{ product.name }}" width="100">
+                </td>
+                <td>{{ product.name }}</td>
+                <td>{{ product.category }}</td>
+                <td>{{ product.description }}</td>
+                <td>{{ product.price }} руб.</td>
+                <td>{{ product.stock }}</td>
+                <td>
+                    <div class="action-buttons">
+                        <!-- Кнопка редактирования -->
+                        <button class="edit-product-btn"
+                                data-id="{{ product.id }}"
+                                data-name="{{ product.name }}"
+                                data-category="{{ product.category }}"
+                                data-description="{{ product.description }}"
+                                data-price="{{ product.price }}"
+                                data-stock="{{ product.stock }}"
+                                data-image="{{ product.image }}">Редактировать</button>
+                        <!-- Кнопка дублирования карточки товара -->
+                        <button class="duplicate-btn" data-id="{{ product.id }}">Дублировать</button>
+                        <!-- Кнопка редактирования карточки товара -->
+                        <button class="delete-btn" data-id="{{ product.id }}">Удалить</button>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+{% endblock %}

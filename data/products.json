@@ -1,0 +1,56 @@
+[
+    {
+        "id": 1,
+        "name": "Ёлочная игрушка 1",
+        "category": "Collection X",
+        "price": 500.0,
+        "stock": 10,
+        "image": "1.png",
+        "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore."
+    },
+    {
+        "id": 2,
+        "name": "Ёлочная игрушка 2",
+        "category": "Collection X",
+        "price": 300,
+        "stock": 15,
+        "image": "2.png",
+        "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore."
+    },
+    {
+        "id": 3,
+        "name": "Ёлочная игрушка 3",
+        "category": "Collection X",
+        "price": 800,
+        "stock": 20,
+        "image": "3.png",
+        "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore."
+    },
+    {
+        "id": 4,
+        "name": "Ёлочная игрушка 4",
+        "category": "Collection Z",
+        "price": 600,
+        "stock": 5,
+        "image": "4.png",
+        "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore."
+    },
+    {
+        "id": 5,
+        "name": "Ёлочная игрушка 5",
+        "category": "Collection Z",
+        "price": 400,
+        "stock": 7,
+        "image": "5.png",
+        "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore."
+    },
+    {
+        "id": 6,
+        "name": "Ёлочная игрушка 6",
+        "category": "Collection V",
+        "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore.",
+        "price": 500,
+        "stock": 15,
+        "image": "product_6_заглушка.png"
+    }
+]

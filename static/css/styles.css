@@ -1,0 +1,796 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Прижимаем контент к началу страницы */
+    height: 100vh;
+}
+
+/* Стили для боковой панели */
+.sidebar {
+    width: 250px;
+    background-color: #333;
+    color: white;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding-top: 20px;
+}
+
+.sidebar h2 {
+    text-align: center;
+    margin-bottom: 40px;
+    font-size: 22px;
+}
+
+.sidebar ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.sidebar ul li {
+    padding: 15px;
+    text-align: center;
+    border-bottom: 1px solid #444;
+}
+
+.sidebar ul li a {
+    color: white;
+    text-decoration: none;
+    font-size: 18px;
+    display: block;
+}
+
+.sidebar ul li a:hover {
+    background-color: #575757;
+}
+
+/* Основная панель */
+.main-content {
+    margin-left: 250px;
+    padding: 20px;
+    width: 100%;
+}
+
+.main-content h1 {
+    font-size: 28px;
+    margin-bottom: 20px;
+}
+
+.main-content table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.main-content table, th, td {
+    border: 1px solid #ddd;
+}
+
+.main-content th, td {
+    padding: 12px;
+    text-align: left;
+}
+
+.main-content th {
+    background-color: #f4f4f4;
+}
+
+/* Стили для модального окна вкладки Товары */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    background-color: white;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 400px;
+}
+
+.close {
+    float: right;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+form div {
+    margin-bottom: 10px;
+}
+
+form label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+form input {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+}
+
+button {
+    padding: 10px 15px;
+    background-color: #333;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #575757;
+}
+
+
+/* Модальное окно для вкладки Заказы */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    background-color: white;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 400px;
+}
+
+.close {
+    float: right;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+button {
+    padding: 10px 15px;
+    background-color: #333;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #575757;
+}
+
+form label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+form select, input {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+}
+
+.table {
+    margin-bottom: 20px;
+}
+
+/* Настройки админ-панели */
+
+.settings-section {
+    margin-bottom: 30px;
+}
+
+.settings-section h2 {
+    font-size: 24px;
+    margin-bottom: 15px;
+}
+
+form div {
+    margin-bottom: 15px;
+}
+
+form label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+form input, form select {
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+button {
+    padding: 10px 15px;
+    background-color: #333;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #575757;
+}
+
+
+/* Стили для контейнера выхода */
+.logout-container {
+    max-width: 400px;
+    margin: 100px auto;
+    text-align: center;
+    padding: 20px;
+    background-color: #f4f4f4;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.logout-container h1 {
+    margin-bottom: 20px;
+    font-size: 24px;
+}
+
+.logout-container p {
+    font-size: 18px;
+    margin-bottom: 30px;
+}
+
+.logout-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.logout-btn, .cancel-btn {
+    padding: 10px 20px;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.logout-btn {
+    background-color: #333;
+    color: white;
+}
+
+.logout-btn:hover {
+    background-color: #575757;
+}
+
+.cancel-btn {
+    background-color: #ccc;
+    color: black;
+}
+
+.cancel-btn:hover {
+    background-color: #aaa;
+}
+
+/* Стили для контейнера формы входа */
+.login-container {
+    max-width: 400px;
+    margin: 50px auto; /* Уменьшаем верхний и нижний отступ */
+    padding: 20px;
+    background-color: #f4f4f4;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    text-align: center;
+    height: auto;
+}
+
+
+.login-container h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+form div {
+    margin-bottom: 20px;
+}
+
+form label {
+    display: block;
+    font-size: 16px;
+    margin-bottom: 8px;
+}
+
+form input {
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+button {
+    padding: 10px 20px;
+    background-color: #333;
+    color: white;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+}
+
+button:hover {
+    background-color: #575757;
+}
+
+.login-error {
+    margin-top: 20px;
+    color: red;
+    font-size: 16px;
+}
+
+
+
+/* Стили для контейнера формы входа Users */
+.login-container {
+    max-width: 400px;
+    margin: 100px auto;
+    padding: 30px;
+    background-color: #f4f4f4;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    text-align: center;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.login-container h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+form div {
+    margin-bottom: 20px;
+}
+
+form label {
+    display: block;
+    font-size: 16px;
+    margin-bottom: 8px;
+}
+
+form input {
+    width: 100%;
+    padding: 12px;
+    box-sizing: border-box;
+    font-size: 16px;
+}
+
+button {
+    padding: 12px 20px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    font-size: 16px;
+    border-radius: 5px;
+}
+
+button:hover {
+    background-color: #218838;
+}
+
+.login-links {
+    margin-top: 20px;
+    font-size: 14px;
+}
+
+.login-links a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.login-links a:hover {
+    text-decoration: underline;
+}
+
+.login-error {
+    margin-top: 20px;
+    color: red;
+    font-size: 16px;
+}
+
+
+/* Основной контейнер для личного кабинета */
+.dashboard-container {
+    max-width: 1200px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.dashboard-container h1 {
+    text-align: center;
+    margin-bottom: 40px;
+    font-size: 28px;
+}
+
+/* Меню личного кабинета */
+.dashboard-menu {
+    margin-bottom: 30px;
+}
+
+.dashboard-menu ul {
+    list-style-type: none;
+    padding: 0;
+    display: flex;
+    justify-content: space-around;
+    background-color: #333;
+    border-radius: 5px;
+}
+
+.dashboard-menu ul li {
+    padding: 10px;
+}
+
+.dashboard-menu ul li a {
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+}
+
+.dashboard-menu ul li a:hover {
+    text-decoration: underline;
+}
+
+/* Контентная часть личного кабинета */
+.dashboard-content section {
+    margin-bottom: 40px;
+}
+
+h2 {
+    font-size: 22px;
+    margin-bottom: 20px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table th, table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+table th {
+    background-color: #f4f4f4;
+}
+
+form div {
+    margin-bottom: 20px;
+}
+
+form label {
+    display: block;
+    font-size: 16px;
+    margin-bottom: 8px;
+}
+
+form input[type="text"], form input[type="email"], form input[type="checkbox"] {
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+button {
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+button:hover {
+    background-color: #218838;
+}
+
+address {
+    font-style: normal;
+    line-height: 1.5;
+}
+
+/* Модальное окно для добавления Товаров */
+./* Стили для полей формы в модальном окне */
+.modal-content form input[type="text"],
+.modal-content form textarea,
+.modal-content form input[type="number"],
+.modal-content form input[type="file"] {
+    width: 100%;
+    margin: 5px 0 10px 0;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* Расширение поля описания по ширине и высоте */
+.modal-content form textarea {
+    width: 100%;
+    height: 150px;
+    resize: vertical;
+}
+
+/* Увеличение ширины поля для цены */
+.modal-content form input[name="price"] {
+    width: 50%;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+/* Уменьшение размера поля "в наличии" */
+.modal-content form input[name="stock"] {
+    width: 50%;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+/* Увеличение кнопки отправки */
+.modal-content form .submit-btn {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.modal-content form .submit-btn:hover {
+    background-color: #45a049;
+}
+
+/* Стили для кнопки "Добавить новый товар" */
+.add-product-btn {
+    margin-bottom: 20px;
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+    width: 150px;
+    margin-top: 20px;  /* Добавлен отступ сверху */
+}
+
+.add-product-btn:hover {
+    background-color: #45a049;
+}
+
+/* отступы между кнопками для редактирования товара */
+.action-buttons button {
+    width: 200px;
+    margin-bottom: 10px; /* Добавляет отступ в 10px между кнопками */
+}
+
+/* Стиль боковой панели */
+.sidebar {
+    width: 200px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background-color: #333;
+    z-index: 1000;
+    overflow-x: hidden;
+    transition: 0.3s;
+}
+
+/* Упрощенный вид при узких экранах */
+.sidebar.collapsed {
+    width: 0;
+    overflow: hidden;
+}
+
+/* Гамбургер-меню */
+.hamburger {
+    display: none;
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    font-size: 30px;
+    z-index: 1001;
+    cursor: pointer;
+}
+
+/* Адаптация для малых экранов */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 0;
+        overflow: hidden;
+    }
+
+    .hamburger {
+        display: block;
+    }
+
+    .table-container {
+        margin-left: 0;
+        padding: 20px;
+    }
+}
+
+
+@media (max-width: 768px) {
+    .main-content {
+        margin-left: 0; /* Убирает отступ слева */
+    }
+
+    .table-container {
+        margin-left: 0;
+    }
+
+    table {
+        margin-left: 0; /* Сдвигает таблицу влево */
+        width: 100%; /* Устанавливает ширину таблицы на 100% */
+    }
+}
+
+/* Добавить отступ для заголовков */
+h1, h2, h3 {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+/* Увеличение отступов для кнопки "Добавить новый товар" */
+.add-product-btn {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+/* Общее правило для текста внутри таблицы */
+.table-container table td,
+.table-container table th {
+    padding: 10px;
+    vertical-align: top;
+    word-wrap: break-word; /* Перенос длинных слов */
+    max-width: 200px; /* Ограничение ширины ячеек */
+}
+
+/* Убедитесь, что таблица адаптивна */
+.table-container {
+    overflow-x: auto; /* Прокрутка по горизонтали при переполнении */
+    margin-top: 20px; /* Отступ сверху */
+}
+
+/* Отступы для гамбургер-меню */
+.hamburger {
+    margin-right: 20px;
+}
+
+/* Для заголовка в режиме гамбургер-меню */
+.main-content h1 {
+    margin-left: 20px;
+    margin-top: 20px;
+}
+
+/* Стили для гамбургер-меню */
+.hamburger {
+    display: none;
+    font-size: 24px;
+    cursor: pointer;
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 1001;
+}
+
+/* Скрытая боковая панель по умолчанию */
+.sidebar {
+    width: 200px;
+    background-color: #333;
+    color: white;
+    position: fixed;
+    height: 100%;
+    top: 0;
+    left: 0;
+    overflow: auto;
+    transition: transform 0.3s ease;
+    z-index: 1000;
+}
+
+.sidebar.hidden {
+    transform: translateX(-100%);
+}
+
+@media (max-width: 768px) {
+    .hamburger {
+        display: block; /* Показать гамбургер при маленьком экране */
+    }
+
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        transform: translateX(-100%);
+    }
+
+    .sidebar.active {
+        transform: translateX(0);
+    }
+}
+
+
+
+@media (max-width: 768px) {
+    .sidebar {
+        display: none; /* Скройте боковую панель */
+    }
+
+    .hamburger {
+        display: block; /* Отобразите гамбургер-меню */
+    }
+
+    .main-content {
+        margin-left: 0;
+    }
+
+    /* Увеличение отступов для таблицы */
+    .table-container {
+        padding: 10px;
+    }
+
+    /* Для кнопок действий */
+    .action-buttons button {
+        margin-bottom: 10px;
+    }
+}
+
+
+@media (max-width: 768px) {
+    .hamburger {
+        display: block; /* Показать гамбургер при маленьком экране */
+    }
+
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        transform: translateX(-100%);
+    }
+
+    .sidebar.active {
+        transform: translateX(0);
+    }
+}
+
+.sidebar {
+    width: 200px;
+    background-color: #333;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    overflow: auto;
+    transition: transform 0.3s ease;
+    z-index: 1000;
+}
+
+.sidebar.hidden {
+    transform: translateX(-100%);
+}
+
+.hamburger {
+    font-size: 30px;
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    cursor: pointer;
+    z-index: 1100;
+}

@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block title %}Выход - Админ Панель{% endblock %}
+
+{% block content %}
+<div class="logout-container">
+    <h1>Выход из системы</h1>
+    <p>Вы уверены, что хотите выйти?</p>
+
+    <div class="logout-actions">
+        <button id="confirmLogout" class="logout-btn">Выйти</button>
+        <button id="cancelLogout" class="cancel-btn">Отмена</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/logout.js') }}"></script>
+{% endblock %}

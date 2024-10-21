@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}Настройки{% endblock %}
+
+{% block content %}
+<h1>Настройки</h1>
+<section class="settings-section">
+    <h2>Основные настройки</h2>
+    <form id="basicSettingsForm">
+        <div>
+            <label for="storeName">Название магазина:</label>
+            <input type="text" id="storeName" value="Мой Интернет-Магазин">
+        </div>
+        <div>
+            <label for="storeEmail">Email магазина:</label>
+            <input type="email" id="storeEmail" value="store@example.com">
+        </div>
+        <button type="submit">Сохранить</button>
+    </form>
+</section>
+{% endblock %}

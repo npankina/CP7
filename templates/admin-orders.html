@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}Управление заказами{% endblock %}
+
+{% block content %}
+<h1>Управление заказами</h1>
+<table>
+    <tr>
+        <th>ID</th>
+        <th>Имя покупателя</th>
+        <th>Дата</th>
+        <th>Сумма</th>
+        <th>Статус</th>
+        <th>Действия</th>
+    </tr>
+    <tr data-id="101">
+        <td>101</td>
+        <td>Иван Иванов</td>
+        <td>2024-10-10</td>
+        <td>12 500 руб.</td>
+        <td class="order-status">Ожидает</td>
+        <td><a href="#" class="edit-status">Изменить статус</a></td>
+    </tr>
+</table>
+{% endblock %}

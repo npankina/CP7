@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}Личный кабинет{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <h1>Добро пожаловать, Иван Иванов!</h1>
+    <div class="dashboard-menu">
+        <ul>
+            <li><a href="#orders">История заказов</a></li>
+            <li><a href="#personal-info">Личная информация</a></li>
+            <li><a href="#addresses">Адреса доставки</a></li>
+            <li><a href="#notifications">Настройки уведомлений</a></li>
+            <li><a href="{{ url_for('user_logout') }}">Выйти</a></li>
+        </ul>
+    </div>
+    <section id="personal-info">
+        <h2>Личная информация</h2>
+        <form id="personalInfoForm" method="POST">
+            <div>
+                <label for="fullName">ФИО:</label>
+                <input type="text" id="fullName" name="fullName" value="Иван Иванов">
+            </div>
+            <button type="submit">Сохранить изменения</button>
+        </form>
+    </section>
+</div>
+{% endblock %}

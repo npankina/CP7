@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}Админ Панель - Пользователи{% endblock %}
+
+{% block content %}
+<div class="main-container">
+    <h1>Пользователи</h1>
+    <div class="table-container">
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>Имя</th>
+                <th>Email</th>
+                <th>Дата регистрации</th>
+                <th>Роль</th>
+                <th>Действия</th>
+            </tr>
+            <tr data-id="1">
+                <td>1</td>
+                <td>Иван Иванов</td>
+                <td>ivanov@example.com</td>
+                <td>2024-01-10</td>
+                <td class="user-role">Администратор</td>
+                <td>
+                    <a href="#" class="edit-role">Изменить роль</a> |
+                    <a href="#" class="delete-user">Удалить</a>
+                </td>
+            </tr>
+            <tr data-id="2">
+                <td>2</td>
+                <td>Мария Петрова</td>
+                <td>petrova@example.com</td>
+                <td>2024-05-20</td>
+                <td class="user-role">Пользователь</td>
+                <td>
+                    <a href="#" class="edit-role">Изменить роль</a> |
+                    <a href="#" class="delete-user">Удалить</a>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Модальное окно для изменения роли пользователя -->
+    <div class="modal" id="roleModal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Изменить роль пользователя</h2>
+            <form id="roleForm">
+                <input type="hidden" id="userId">
+                <label for="userRole">Роль:</label>
+                <select id="userRole">
+                    <option value="Администратор">Администратор</option>
+                    <option value="Пользователь">Пользователь</option>
+                </select>
+                <button type="submit">Сохранить</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/admin-users.js') }}"></script>
+{% endblock %}
