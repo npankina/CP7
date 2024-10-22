@@ -1,95 +1,100 @@
-from flask import Flask, render_template, request, jsonify
-from data_adapter import DataAdapter
-from logger import setup_logger
+# Контроллеры (Flask Views) `main.py` [ обработчики HTTP-запросов, которые принимают запросы от пользователя и передают их в сервисный слой.]
+# Сервисный слой (Business Logic) `service_layer.py` [ обрабатывает бизнес-логику, проводит валидацию данных, вызывает необходимые методы DAL или ORM.]
+# DAL или ORM (Data Access Layer) `data/` [ непосредственно взаимодействует с базой данных.]
+# База данных
+import os
+from flask import Flask, render_template, jsonify
+from flask_sqlalchemy import SQLAlchemy
 
+from db_connection import Queries
+from config import config_by_name
+from logger import logger
+
+# Настройки
 #----------------------------------------------------------------------------------------------------
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'
-logger = setup_logger('product_logger', 'app.log')
+config_name = os.getenv('FLASK_ENV', 'development')  # Установка окружения (development, production, testing)
+app.config.from_object(config_by_name[config_name])
 #----------------------------------------------------------------------------------------------------
-# Инициализация адаптера данных
-data_adapter = DataAdapter(source_type='json', source_path='data/products.json')
+
+
+
+
 #----------------------------------------------------------------------------------------------------
-@app.route('/admin')
-def admin_products():
-    products = data_adapter.load_data()
-    return render_template('admin.html', products=products)
+@app.route('/', methods=['GET'])
+def home():
+    return "Main page"
 #----------------------------------------------------------------------------------------------------
+# Маршрут для отображения продуктов
+@app.route('/admin', methods=['GET'])
+def admin_panel():
+    try:
+        data = Queries.get_all_products()
+        print(data)  # Вывод данных для отладки
+
+        return render_template('admin.html', products=data)
+
+    except Exception as e:
+        return jsonify({'message': f'Ошибка при отображении админ-панели: {e}'}), 500
+#----------------------------------------------------------------------------------------------------
+# Маршрут для добавления нового продукта
 @app.route('/admin/products/add', methods=['POST'])
 def add_product():
     try:
-        product_data = request.form
-        new_product = {
-            "id": int(product_data.get('id')),
-            "name": product_data.get('name'),
-            "description": product_data.get('description'),
-            "price": float(product_data.get('price')),
-            "stock": int(product_data.get('stock'))
-        }
-        data_adapter.add_product(new_product)
-        logger.info(f'Product {new_product["id"]} added successfully')
-        return jsonify({'message': 'Product added successfully'}), 200
+
+
+        # logger.info(f'Продукт "{new_product.name}" успешно добавлен')
+        return jsonify({'message': 'Продукт успешно добавлен'}), 200
 
     except Exception as e:
-        logger.error(f'Error adding product: {e}')
-        return jsonify({'message': 'Error adding product'}), 500
+        logger.error(f'Ошибка при добавлении продукта: {e}')
+        return jsonify({'message': f'Ошибка при добавлении продукта: {e}'}), 500
 #----------------------------------------------------------------------------------------------------
+# Маршрут для редактирования продукта
+# @app.route('/admin/products/edit/<int:id>', methods=['PUT'])
 @app.route('/admin/products/edit', methods=['POST'])
 def edit_product():
     try:
-        product_data = request.form
-        product_id = int(product_data.get('id'))
-        updated_product = {
-            "id": product_id,
-            "name": product_data.get('name'),
-            "description": product_data.get('description'),
-            "price": float(product_data.get('price')),
-            "stock": int(product_data.get('stock'))
-        }
-        data_adapter.update_product(product_id, updated_product)
-        logger.info(f'Product {product_id} updated successfully')
-        return jsonify({'message': 'Product updated successfully'}), 200
+
+        return jsonify({'message': 'Продукт успешно обновлен'}), 200
 
     except Exception as e:
-        logger.error(f'Error updating product: {e}')
-        return jsonify({'message': 'Error updating product'}), 500
+        logger.error(f'Ошибка при обновлении продукта с ID {id}: {e}')
+        return jsonify({'message': f'Ошибка при обновлении продукта: {e}'}), 500
 #----------------------------------------------------------------------------------------------------
-@app.route('/admin/products/delete', methods=['POST'])
-def delete_product():
+# Маршрут для удаления продукта
+@app.route('/admin/products/delete/<int:id>', methods=['DELETE'])
+def delete_product(id):
     try:
-        data = request.get_json()
-        product_id = int(data.get('id'))
-        data_adapter.delete_product(product_id)
-        logger.info(f'Product {product_id} deleted successfully')
-        return jsonify({'message': 'Product deleted successfully'}), 200
+
+        logger.info(f'Продукт с ID {id} успешно удален')
+        return jsonify({'message': 'Продукт успешно удален'}), 200
 
     except Exception as e:
-        logger.error(f'Error deleting product: {e}')
-        return jsonify({'message': 'Error deleting product'}), 500
+        logger.error(f'Ошибка при удалении продукта с ID {id}: {e}')
+        return jsonify({'message': f'Ошибка при удалении продукта: {e}'}), 500
 #----------------------------------------------------------------------------------------------------
-# Маршрут для страницы заказов
-@app.route('/admin/orders')
+@app.route('/admin/orders', methods=['GET'])
 def admin_orders():
-    orders = load_orders()  # Загрузка заказов (примерная функция)
-    return render_template('orders.html', orders=orders)
+    pass
 #----------------------------------------------------------------------------------------------------
-# Маршрут для страницы пользователей
-@app.route('/admin/users')
+@app.route('/admin/users', methods=['GET'])
 def admin_users():
-    users = load_users()  # Загрузка пользователей (примерная функция)
-    return render_template('users.html', users=users)
+    pass
 #----------------------------------------------------------------------------------------------------
-# Маршрут для страницы настроек
-@app.route('/admin/settings')
+@app.route('/admin/settings', methods=['GET'])
 def admin_settings():
-    settings = load_settings()  # Загрузка настроек (примерная функция)
-    return render_template('settings.html', settings=settings)
+    pass
+# #----------------------------------------------------------------------------------------------------
+# def login():
+#     pass
+# # ----------------------------------------------------------------------------------------------------
+# def register():
+#     pass
 #----------------------------------------------------------------------------------------------------
-# Маршрут для выхода из системы
-@app.route('/admin/logout')
-def admin_logout():
-    # Реализация выхода, возможно, очистка сессии или перенаправление на страницу входа
-    return render_template('logout.html')
+@app.route('/admin/logout', methods=['GET'])
+def logout():
+    pass
 #----------------------------------------------------------------------------------------------------
 
 

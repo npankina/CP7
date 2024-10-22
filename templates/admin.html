@@ -57,7 +57,12 @@
             <tr>
                 <td>{{ product.id }}</td>
                 <td>
-                    <img src="{{ url_for('static', filename='images/' + product.image) }}" alt="{{ product.name }}" width="100">
+<!--                    <img src="{{ url_for('static', filename='images/' + product.image) }}" alt="{{ product.name }}" width="100">-->
+                   {% if product.image %}
+                        <img src="data:image/jpeg;base64,{{ product.image }}" alt="{{ product.name }}">
+                    {% else %}
+                        <p>Изображение отсутствует</p>
+                    {% endif %}
                 </td>
                 <td>{{ product.name }}</td>
                 <td>{{ product.category }}</td>

@@ -1,2 +1,0 @@
-2024-10-21 18:12:06,232 - product_logger - INFO - Product 1 updated successfully: {'name': 'Ёлочная игрушка 0', 'description': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore.', 'price': 500.0, 'stock': 10}
-2024-10-21 18:12:27,980 - product_logger - INFO - Product 1 updated successfully: {'name': 'Ёлочная игрушка 1', 'description': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore.', 'price': 500.0, 'stock': 10}

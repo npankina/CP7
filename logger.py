@@ -1,24 +1,22 @@
 import logging
-from logging.handlers import RotatingFileHandler
+import os
 
-def setup_logger(name='app_logger', log_file='app.log', level=logging.INFO):
-    """
-    Настраивает логгер с заданным именем, файлом логов и уровнем логирования.
-    """
-    # Создаем логгер
-    logger = logging.getLogger(name)
-    logger.setLevel(level)
+# Получаем текущую рабочую директорию
+log_dir = os.path.dirname(os.path.abspath(__file__))
+log_file = os.path.join(log_dir, 'application.log')
 
-    # Обработчик для записи логов в файл
-    handler = RotatingFileHandler(log_file, maxBytes=100000, backupCount=1)
-    handler.setLevel(level)
+# Настройка логгера для всего приложения
+logger = logging.getLogger("ApplicationLogger")
+logger.setLevel(logging.INFO)
 
-    # Формат логов
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    handler.setFormatter(formatter)
+# Создание обработчика для записи в файл
+file_handler = logging.FileHandler(log_file, encoding="utf-8")
+file_handler.setLevel(logging.INFO)
 
-    # Добавляем обработчик к логгеру
-    if not logger.handlers:
-        logger.addHandler(handler)
+# Форматирование логов
+formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s')
+file_handler.setFormatter(formatter)
 
-    return logger
+# Добавляем обработчик к логгеру
+if not logger.handlers:
+    logger.addHandler(file_handler)
