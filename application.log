@@ -1,8 +1,0 @@
-
-2024-10-23 14:29:30,528 INFO: Успешное подключение к базе данных
-2024-10-23 14:29:30,528 INFO: Выполнение запроса к базе данных...
-2024-10-23 14:29:30,684 ERROR: Ошибка при получении списка товаров: ОШИБКА:  нет доступа к таблице products
-
-2024-10-23 14:29:59,361 ERROR: Ошибка при подключении к базе данных: connection to server at "localhost" (::1), port 5432 failed: fe_sendauth: no password supplied
-
-2024-10-23 14:29:59,378 ERROR: Ошибка при получении списка товаров: 'NoneType' object does not support the context manager protocol
