@@ -62,7 +62,7 @@ class Queries:
     def get_all_products():
         query = """
             SELECT 
-                p.id, 
+                p.i
                 p.name, 
                 p.description, 
                 p.price, 
