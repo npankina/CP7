@@ -12,11 +12,12 @@
     <div class="sidebar">
         <h2>Админ Панель</h2>
         <ul>
-            <li><a href="{{ url_for('admin_panel') }}">Товары</a></li>
+            <li><a href="{{ url_for('home') }}">Главная</a></li>
+            <li><a href="{{ url_for('admin_panel') }}">Админ Панель</a></li>
+             <li><a href="{{ url_for('admin_products') }}">Товары [db]</a></li>
             <li><a href="{{ url_for('admin_orders') }}">Заказы</a></li>
             <li><a href="{{ url_for('admin_users') }}">Пользователи</a></li>
             <li><a href="{{ url_for('admin_settings') }}">Настройки</a></li>
-            <li><a href="{{ url_for('logout') }}">Выход</a></li>
         </ul>
     </div>
 
