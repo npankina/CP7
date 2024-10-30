@@ -26,6 +26,8 @@ class Requests:
                 JOIN Categories c ON p.category_id = c.id
                 WHERE p.is_active = true
                 ORDER BY p.id ASC;""")
+        conn = None
+        cursor = None
 
         try:
             with connect_to_db() as conn:
@@ -82,6 +84,9 @@ class Requests:
                         ORDER BY 
                             o.order_date DESC;
                         """)
+        conn = None
+        cursor = None
+
         try:
             with connect_to_db() as conn:
                 with conn.cursor() as cursor:
@@ -120,6 +125,9 @@ class Requests:
                     r.name AS role
                     FROM Users u
                     JOIN Roles r ON u.role_id = r.id;""")
+        conn = None
+        cursor = None   
+
         try:
             with connect_to_db() as conn:
                 with conn.cursor() as cursor:
@@ -139,6 +147,84 @@ class Requests:
         except Exception as e:
             logger.error(f"Ошибка при выполнении запроса к БД для выборки всех пользователей: {e}")
             raise
+
+        finally:
+            if cursor:
+                cursor.close()
+            if conn:
+                conn.close()
+#----------------------------------------------------------------------------------------------------
+    @staticmethod
+    def duplicate_product(product_id):
+        query = ("""INSERT INTO Products (name, description, price, stock_quantity, is_active, category_id, image_path)
+                SELECT name, description, price, stock_quantity, is_active, category_id, image_path
+                FROM Products
+                WHERE id = %s;""")
+        conn = None
+        cursor = None
+
+        try:
+            with connect_to_db() as conn:
+                with conn.cursor() as cursor:
+                    cursor.execute(query, (product_id,))
+                    conn.commit()
+                    return True
+
+        except Exception as e:
+            logger.error(f"Ошибка при дублировании товара с id {product_id}: {str(e)}")
+            return False
+
+        finally:
+            if cursor:
+                cursor.close()
+            if conn:
+                conn.close()
+#----------------------------------------------------------------------------------------------------
+    @staticmethod
+    def delete_product(product_id):
+        query = "UPDATE Products SET is_active = FALSE WHERE id = %s;"
+        conn = None
+        cursor = None
+
+        try:
+            with connect_to_db() as conn:
+                with conn.cursor() as cursor:
+                    cursor.execute(query, (product_id,))
+                    conn.commit()
+                    return True
+
+        except Exception as e:
+            logger.error(f"Ошибка при удалении товара с id {product_id}: {str(e)}")
+            return False
+
+        finally:
+            if cursor:
+                cursor.close()
+            if conn:
+                conn.close()
+#----------------------------------------------------------------------------------------------------
+    @staticmethod
+    def edit_product(product_id, updates):
+        if not updates:
+            logger.error(f"Не переданы данные для редактирования товара с id {product_id}")
+            return False
+
+        set_clause = ', '.join(f"{key} = %s" for key in updates.keys())
+        query = f"UPDATE Products SET {set_clause} WHERE id = %s;"
+
+        conn = None
+        cursor = None
+
+        try:
+            with connect_to_db() as conn:
+                with conn.cursor() as cursor:
+                    cursor.execute(query, (*updates.values(), product_id,))
+                    conn.commit()
+                    return True
+
+        except Exception as e:
+            logger.error(f"Ошибка при редактировании товара с id {product_id}: {str(e)}")
+            return False
 
         finally:
             if cursor:

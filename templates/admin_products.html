@@ -27,7 +27,7 @@
             <tr>
                 <td>{{ product.id }}</td>
                 <td>
-                    <img src="{{ url_for('static', filename=product.image) }}" alt="{{ product.image }}"  width="200">
+                    <img src="{{ url_for('static', filename=product.image) }}" alt="{{ product.image }}"  width="150">
                 </td>
                 <td>{{ product.name }}</td>
                 <td>{{ product.category }}</td>
@@ -63,7 +63,8 @@
         <div class="modal-content">
             <span class="close-btn">&times;</span>
             <h2>Редактировать товар</h2>
-            <form id="edit-product-form" action="/admin/products/edit" method="POST" enctype="multipart/form-data">
+            <form id="edit-product-form" action="#" method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <input type="hidden" id="edit-id" name="id">
 
                 <label for="edit-name">Название:</label>
@@ -95,5 +96,136 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+<script>
+    // Обработчик дублирования товара
+    document.querySelectorAll('.duplicate-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.getAttribute('data-id');
+            fetch(`/admin/products/duplicate/${productId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token() }}'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        throw new Error(data.message || 'Ошибка при дублировании товара.');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    alert('Товар успешно добавлен (дублирован).');
+                    location.reload();
+                } else {
+                    alert(data.message || 'Ошибка при дублировании товара');
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert('Произошла ошибка при выполнении запроса');
+            });
+        });
+    });
+
+    // Обработчик удаления товара
+    document.querySelectorAll('.delete-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.getAttribute('data-id');
+            fetch(`/admin/products/delete/${productId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token() }}'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        throw new Error(data.message || 'Ошибка при удалении товара.');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    alert('Товар успешно помечен как удаленный.');
+                    location.reload();
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert(error.message || 'Произошла ошибка при выполнении запроса.');
+            });
+        });
+    });
+
+    // Обработчик редактирования товара
+    document.querySelectorAll('.edit-product-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.getAttribute('data-id');
+
+            // Заполнение формы данными товара
+            document.getElementById('edit-id').value = productId;
+            document.getElementById('edit-name').value = this.getAttribute('data-name');
+            document.getElementById('edit-category').value = this.getAttribute('data-category');
+            document.getElementById('edit-description').value = this.getAttribute('data-description');
+            document.getElementById('edit-price').value = this.getAttribute('data-price');
+            document.getElementById('edit-stock').value = this.getAttribute('data-stock');
+
+            // Открытие модального окна
+            const modal = document.getElementById('edit-product-modal');
+            modal.style.display = 'block';
+
+            // Обработчик отправки формы
+            const editForm = document.getElementById('edit-product-form');
+
+            editForm.onsubmit = function(event) {
+                event.preventDefault(); // Предотвращаем стандартное поведение формы
+
+            const formData = new FormData(editForm); // Собираем данные из формы
+
+            fetch(`/admin/products/edit/${document.getElementById('edit-id').value}`, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value // Убедитесь, что это правильный токен
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => {
+                        throw new Error(text || 'Ошибка при редактировании товара.');
+                        });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    alert('Товар успешно отредактирован.');
+                    location.reload(); // Перезагружаем страницу
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert(error.message || 'Произошла ошибка при выполнении запроса.');
+            });
+        };
+    });
+            
+
+    // Закрытие модального окна
+    document.querySelector('.close-btn').addEventListener('click', function() {
+        const modal = document.getElementById('edit-product-modal');
+        modal.style.display = 'none'; // Скрыть модальное окно
+    });
+
+
+    // Обработчик добавления нового товара
+    
+    
+</script>
 {% endblock %}
