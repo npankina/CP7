@@ -15,28 +15,29 @@
                 <th>Роль</th>
                 <th>Действия</th>
             </tr>
+            {% for user in users %}
             <tr data-id="1">
-                <td>1</td>
-                <td>Иван Иванов</td>
-                <td>ivanov@example.com</td>
-                <td>2024-01-10</td>
-                <td class="user-role">Администратор</td>
+                <td> {{ user.id }} </td>
+                <td> {{ user.username }} </td>
+                <td> {{ user.email }} </td>
+                <td> {{ user.registration }} </td>
+                <td class="user-role">
+                    {% if user.role == 'admin' %}
+                        Администратор
+                    {% elif user.role == 'customer' %}
+                        Пользователь
+                    {% elif user.role == 'developer' %}
+                        Разработчик
+                    {% else %}
+                        Неизвестная роль
+                    {% endif %}
+                </td>
                 <td>
                     <a href="#" class="edit-role">Изменить роль</a> |
                     <a href="#" class="delete-user">Удалить</a>
                 </td>
             </tr>
-            <tr data-id="2">
-                <td>2</td>
-                <td>Мария Петрова</td>
-                <td>petrova@example.com</td>
-                <td>2024-05-20</td>
-                <td class="user-role">Пользователь</td>
-                <td>
-                    <a href="#" class="edit-role">Изменить роль</a> |
-                    <a href="#" class="delete-user">Удалить</a>
-                </td>
-            </tr>
+            {% endfor %}
         </table>
     </div>
 

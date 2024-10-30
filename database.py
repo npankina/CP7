@@ -54,3 +54,96 @@ class Requests:
                 cursor.close()
             if conn:
                 conn.close()
+#----------------------------------------------------------------------------------------------------
+    @staticmethod
+    def get_orders():
+        query = ("""SELECT 
+                            o.id AS order_id,
+                            o.user_id,
+                            o.order_date,
+                            o.total_price,
+                            os.name AS status,
+                            oi.product_id,
+                            p.name AS product_name,
+                            oi.quantity,
+                            oi.price_at_purchase,
+                            u.username,
+                            u.email
+                        FROM 
+                            Orders o
+                        JOIN 
+                            Order_statuses os ON o.status_id = os.id
+                        JOIN 
+                            Order_items oi ON o.id = oi.order_id
+                        JOIN 
+                            Products p ON oi.product_id = p.id
+                        JOIN
+                            Users u ON o.user_id = u.id
+                        ORDER BY 
+                            o.order_date DESC;
+                        """)
+        try:
+            with connect_to_db() as conn:
+                with conn.cursor() as cursor:
+                    cursor.execute(query)
+                    result = cursor.fetchall()
+
+                    data = [{'order_id': row[0],
+                             'username': row[9],
+                             'order_date': row[2],
+                             'total_price': row[3],
+                             'status': row[4],
+                             'quantity': row[5],
+                             'email': row[10]
+                             }
+                            for row in result]
+
+                    return data
+
+        except Exception as e:
+            logger.error(f"Ошибка при выполнении запроса к БД для выборки всех заказов: {e}")
+            raise
+
+        finally:
+            if cursor:
+                cursor.close()
+            if conn:
+                conn.close()
+#----------------------------------------------------------------------------------------------------
+    @staticmethod
+    def get_users():
+        query = ("""SELECT 
+                    u.id,
+                    u.username,
+                    u.email,
+                    u.created_at as registration,
+                    r.name AS role
+                    FROM Users u
+                    JOIN Roles r ON u.role_id = r.id;""")
+        try:
+            with connect_to_db() as conn:
+                with conn.cursor() as cursor:
+                    cursor.execute(query)
+                    result = cursor.fetchall()
+
+                    data = [{'id': row[0],
+                             'username': row[1],
+                             'email': row[2],
+                             'registration': row[3],
+                             'role': row[4]
+                             }
+                            for row in result]
+
+                    return data
+
+        except Exception as e:
+            logger.error(f"Ошибка при выполнении запроса к БД для выборки всех пользователей: {e}")
+            raise
+
+        finally:
+            if cursor:
+                cursor.close()
+            if conn:
+                conn.close()
+#----------------------------------------------------------------------------------------------------
+
