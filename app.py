@@ -6,8 +6,12 @@ import logging
 
 #----------------------------------------------------------------------------------------------------
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'your_secret_key'
-csrf = CSRFProtect(app)
+app.config['SECRET_KEY'] = 'your_secret_key' # Секретный ключ для защиты от CSRF-атак
+csrf = CSRFProtect(app) # Защита от CSRF-атак
+#----------------------------------------------------------------------------------------------------
+UPLOAD_FOLDER = 'static/uploads/' # Папка для сохранения загруженных изображений
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER # Установка конфигурации для папки загрузки изображений
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'} # Разрешённые расширения файлов
 #----------------------------------------------------------------------------------------------------
 # Настройка логирования
 logging.basicConfig(level=logging.ERROR)
@@ -72,6 +76,60 @@ def delete_product(product_id):
             'success': False,
             'message': 'Произошла ошибка при удалении товара'
         }), 500
+#----------------------------------------------------------------------------------------------------
+@app.route('/admin/products/add', methods=['POST'])
+def add_product():
+    try:
+        product_data = {
+            'name': request.form.get('product_name'),
+            'description': request.form.get('description'),
+            'price': request.form.get('price'),
+            'stock': request.form.get('stock'),
+            'category': request.form.get('category'),
+            'image_path': request.form.get('image')
+        }
+        print(product_data)
+
+        logger.info(f"Попытка добавить продукт с данными: {product_data}")
+
+        success = Requests.add_product(product_data)
+        if success:
+            return jsonify({
+                'success': True,
+                'message': 'Товар успешно добавлен'
+            }), 200
+        else:
+            return jsonify({
+                'success': False,
+                'message': 'Не удалось добавить товар'
+            }), 400
+
+    except Exception as e:
+        logger.error(f"Ошибка при добавлении товара: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': 'Произошла ошибка при добавлении товара'
+        }), 500
+#----------------------------------------------------------------------------------------------------
+@app.route('/admin/products/categories')
+def categories():
+    try:
+        success = Requests.get_categories()
+        print("@app.route('/admin/products/categories')", success)
+        if not success:
+            return jsonify({
+                'success': False,
+                'message': 'Нет доступных категорий'
+            }), 400
+        else:
+            return jsonify({
+                'success': True,
+                'message': 'Категории успешно получены'
+            }), 200
+        
+    except Exception as e:
+        logger.error(f"Ошибка при получении категорий: {str(e)}")
+        return {"message": "Произошла ошибка при получении категорий"}
 #----------------------------------------------------------------------------------------------------
 @app.route('/admin/products/edit/<int:product_id>', methods=['POST'])
 def edit_product(product_id):

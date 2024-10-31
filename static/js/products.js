@@ -1,62 +1,55 @@
 //--------------------------------------------------------------------------------------------------------------
 // Обработчик дублирования товара
-document.querySelectorAll('.duplicate-btn').forEach(button => {
-    button.addEventListener('click', function() {
-        const productId = this.getAttribute('data-id');
-        fetch(`/admin/products/duplicate/${productId}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token() }}'
-            }
-        })
+
+//--------------------------------------------------------------------------------------------------------------
+// Обработчик удаления товара
+
+//--------------------------------------------------------------------------------------------------------------
+// Обработчик редактирования товара
+
+//--------------------------------------------------------------------------------------------------------------
+// Обработчик добавления товара
+
+//--------------------------------------------------------------------------------------------------------------
+// Обработчик выбора категории
+document.getElementById('add-product-btn').addEventListener('click', function() {
+    // Открытие модального окна для добавления нового товара
+    const modal = document.getElementById('edit-product-modal');
+    modal.style.display = 'block';
+
+    // Очистка формы
+    document.getElementById('edit-id').value = '';
+    document.getElementById('edit-name').value = '';
+    document.getElementById('edit-category').value = '';
+    document.getElementById('edit-description').value = '';
+    document.getElementById('edit-price').value = '';
+    document.getElementById('edit-stock').value = '';
+    document.getElementById('edit-image').value = '';
+
+    // Изменение заголовка и кнопки формы
+    modal.querySelector('h2').textContent = 'Добавить новый товар';
+    modal.querySelector('.submit-btn').textContent = 'Добавить';
+
+    // Загрузка категорий
+    fetch('/admin/products/categories')
         .then(response => {
             if (!response.ok) {
-                return response.json().then(data => {
-                    throw new Error(data.message || 'Ошибка при дублировании товара.');
-                });
+                throw new Error('Ошибка при загрузке категорий');
             }
             return response.json();
         })
         .then(data => {
-            if (data.success) {
-                alert('Товар успешно добавлен (дублирован).');
-                location.reload();
-            } else {
-                alert(data.message || 'Ошибка при дублировании товара');
-            }
+            const categorySelect = document.getElementById('category');
+            categorySelect.innerHTML = ''; // Очистка предыдущих значений
+            data.categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category.category_id;
+                option.textContent = category.name;
+                categorySelect.appendChild(option);
+            });
         })
         .catch(error => {
-            console.error('Ошибка:', error);
-            alert('Произошла ошибка при выполнении запроса');
+            console.error('Ошибка при загрузке категорий:', error);
         });
-    });
-});
-//--------------------------------------------------------------------------------------------------------------
-// Обработчик удаления товара
-document.querySelectorAll('.delete-btn').forEach(button => {
-    button.addEventListener('click', function() {
-        const productId = this.getAttribute('data-id');
-        fetch(`/admin/products/delete/${productId}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token() }}'  // Убедитесь, что CSRF токен правильно настроен
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('Товар успешно помечен как удаленный');
-                location.reload();
-            } else {
-                alert(data.message || 'Ошибка при удалении товара');
-            }
-        })
-        .catch(error => {
-            console.error('Ошибка:', error);
-            alert('Произошла ошибка при выполнении запроса');
-        });
-    });
 });
 //--------------------------------------------------------------------------------------------------------------

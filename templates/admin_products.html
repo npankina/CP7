@@ -73,6 +73,9 @@
                 <label for="edit-category">Категория:</label>
                 <input type="text" id="edit-category" name="category" required>
 
+                <label for="category">Выберите категорию:</label>
+                <select id="category" name="category">
+                </select>
                 <label for="edit-description">Описание:</label>
                 <textarea id="edit-description" name="description" required></textarea>
 
@@ -96,6 +99,7 @@
 {% endblock %}
 
 {% block scripts %}
+<script src="{{ url_for('static', filename='js/products.js') }}" defer></script>
 <script>
     // Обработчик дублирования товара
     document.querySelectorAll('.duplicate-btn').forEach(button => {
@@ -162,67 +166,6 @@
             });
         });
     });
-
-    // Обработчик редактирования товара
-    document.querySelectorAll('.edit-product-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            const productId = this.getAttribute('data-id');
-
-            // Заполнение формы данными товара
-            document.getElementById('edit-id').value = productId;
-            document.getElementById('edit-name').value = this.getAttribute('data-name');
-            document.getElementById('edit-category').value = this.getAttribute('data-category');
-            document.getElementById('edit-description').value = this.getAttribute('data-description');
-            document.getElementById('edit-price').value = this.getAttribute('data-price');
-            document.getElementById('edit-stock').value = this.getAttribute('data-stock');
-
-            // Открытие модального окна
-            const modal = document.getElementById('edit-product-modal');
-            modal.style.display = 'block';
-
-            // Обработчик отправки формы
-            const editForm = document.getElementById('edit-product-form');
-
-            editForm.onsubmit = function(event) {
-                event.preventDefault(); // Предотвращаем стандартное поведение формы
-
-            const formData = new FormData(editForm); // Собираем данные из формы
-
-            fetch(`/admin/products/edit/${document.getElementById('edit-id').value}`, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value // Убедитесь, что это правильный токен
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.text().then(text => {
-                        throw new Error(text || 'Ошибка при редактировании товара.');
-                        });
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    alert('Товар успешно отредактирован.');
-                    location.reload(); // Перезагружаем страницу
-                }
-            })
-            .catch(error => {
-                console.error('Ошибка:', error);
-                alert(error.message || 'Произошла ошибка при выполнении запроса.');
-            });
-        };
-    });
-            
-
-    // Закрытие модального окна
-    document.querySelector('.close-btn').addEventListener('click', function() {
-        const modal = document.getElementById('edit-product-modal');
-        modal.style.display = 'none'; // Скрыть модальное окно
-    });
-
 
     // Обработчик добавления нового товара
     
