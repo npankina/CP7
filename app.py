@@ -1,7 +1,8 @@
 from flask import Flask, render_template, jsonify, redirect, url_for, request
 from flask_wtf import CSRFProtect
 from database import Requests
-from utils import load_data
+from werkzeug.utils import secure_filename
+import os
 import logging
 
 #----------------------------------------------------------------------------------------------------
@@ -9,13 +10,16 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key' # Секретный ключ для защиты от CSRF-атак
 csrf = CSRFProtect(app) # Защита от CSRF-атак
 #----------------------------------------------------------------------------------------------------
-UPLOAD_FOLDER = 'static/uploads/' # Папка для сохранения загруженных изображений
+UPLOAD_FOLDER = 'static/images/' # Папка для сохранения загруженных изображений
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER # Установка конфигурации для папки загрузки изображений
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'} # Разрешённые расширения файлов
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'} # Разрешённые расширения файлов
 #----------------------------------------------------------------------------------------------------
 # Настройка логирования
 logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(__name__)
+#----------------------------------------------------------------------------------------------------
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 #----------------------------------------------------------------------------------------------------
 @app.route('/')
 def home():
@@ -80,18 +84,27 @@ def delete_product(product_id):
 @app.route('/admin/products/add', methods=['POST'])
 def add_product():
     try:
+        image = request.files.get('image')
+        image_path = None
+
+        if image and allowed_file(image.filename):
+            image_path = os.path.join(app.config['UPLOAD_FOLDER'], image.filename)
+            image.save(image_path)
+            print(image_path)
+            print(image.filename)
+        
+
         product_data = {
             'name': request.form.get('product_name'),
             'description': request.form.get('description'),
             'price': request.form.get('price'),
             'stock': request.form.get('stock'),
             'category': request.form.get('category'),
-            'image_path': request.form.get('image')
+            'image_name': image.filename
+
         }
-        print(product_data)
-
-        logger.info(f"Попытка добавить продукт с данными: {product_data}")
-
+        # print(product_data)
+        
         success = Requests.add_product(product_data)
         if success:
             return jsonify({
@@ -104,6 +117,7 @@ def add_product():
                 'message': 'Не удалось добавить товар'
             }), 400
 
+
     except Exception as e:
         logger.error(f"Ошибка при добавлении товара: {str(e)}")
         return jsonify({
@@ -115,7 +129,7 @@ def add_product():
 def categories():
     try:
         success = Requests.get_categories()
-        print("@app.route('/admin/products/categories')", success)
+        # print("@app.route('/admin/products/categories')", success)
         if not success:
             return jsonify({
                 'success': False,
@@ -124,6 +138,7 @@ def categories():
         else:
             return jsonify({
                 'success': True,
+                'categories': success,
                 'message': 'Категории успешно получены'
             }), 200
         
@@ -134,20 +149,25 @@ def categories():
 @app.route('/admin/products/edit/<int:product_id>', methods=['POST'])
 def edit_product(product_id):
     try:
-        updates = {}
-        # Получение данных из формы
-        updates['name'] = request.form.get('product_name')
-        updates['category'] = request.form.get('category')
-        updates['description'] = request.form.get('description')
-        updates['price'] = request.form.get('price')
-        updates['stock'] = request.form.get('stock')
-        
-        # Обработка изображения, если оно загружено
-        # image = request.files.get('image')
-        # if image:
-        #     updates['image_path'] = image.filename  # Или сохраните файл на сервере
+        product_id = request.form.get('id')
+        image = request.files.get('image')
 
-        # Обновление данных в базе данных
+        if image and allowed_file(image.filename):
+            filename = secure_filename(image.filename)
+            image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            image.save(image_path)
+            
+
+        updates = {}
+        for key, value in request.form.items():
+            if key != 'csrf_token' and key != 'id':
+                updates[key] = value
+        
+        if updates:
+            return 
+
+        print(updates)
+
         success = Requests.edit_product(product_id, updates)
         if success:
             return jsonify({

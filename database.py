@@ -31,7 +31,7 @@ class Requests:
     @staticmethod
     def get_products():
         query = ("""SELECT p.name as product_name,
-                    p.description, p.price, p.stock_quantity, p.is_active, p.category_id, p.image_path, c.name as collections_name, p.id
+                    p.description, p.price, p.stock_quantity, p.is_active, p.category_id, p.image_name, c.name as collections_name, p.id
                 FROM Products p
                 JOIN Categories c ON p.category_id = c.id
                 WHERE p.is_active = true
@@ -166,8 +166,8 @@ class Requests:
 #----------------------------------------------------------------------------------------------------
     @staticmethod
     def duplicate_product(product_id):
-        query = ("""INSERT INTO Products (name, description, price, stock_quantity, is_active, category_id, image_path)
-                SELECT name, description, price, stock_quantity, is_active, category_id, image_path
+        query = ("""INSERT INTO Products (name, description, price, stock_quantity, is_active, category_id, image_name)
+                SELECT name, description, price, stock_quantity, is_active, category_id, image_name
                 FROM Products
                 WHERE id = %s;""")
         conn = None
@@ -244,26 +244,32 @@ class Requests:
 #----------------------------------------------------------------------------------------------------
     @staticmethod
     def add_product(product_data):
-
-        logger.info(f"Тип product_data: {type(product_data)}")
-        logger.info(f"Содержимое product_data: {product_data}")
+        if not product_data:
+            logger.error(f"Не переданы данные для добавления товара")
+            return False
+        else:
+            logger.info(f"Тип product_data: {type(product_data)}")
+            logger.info(f"Содержимое product_data: {product_data}")
+        
+        if not 'image_name' in product_data:
+            image_name = None
 
         product_name = product_data['name']
         product_description = product_data['description']
         product_price = float(product_data['price'])
         product_stock = int(product_data['stock'])
         product_category = int(product_data['category'])
-        image_path = f'/images/{product_data['image']}'
+        image_name = product_data['image_name']
 
-        query = """INSERT INTO Products (name, description, price, stock_quantity, category_id, image_path)
-                VALUES (%s, %s, %s, %s, %s, %s, %s);"""
+        query = """INSERT INTO Products (name, description, price, stock_quantity, category_id, image_name)
+                VALUES (%s, %s, %s, %s, %s, %s);"""
         conn = None
         cursor = None
 
         try:
             with connect_to_db() as conn:
                 with conn.cursor() as cursor:
-                    cursor.execute(query, (product_name, product_description, product_price, product_stock, product_category, image_path))
+                    cursor.execute(query, (product_name, product_description, product_price, product_stock, product_category, image_name))
                     conn.commit()
                     return True
 
@@ -291,8 +297,8 @@ class Requests:
 
                     data = [{'name': row[0], 'category_id': row[1]} for row in result]
                     
-                    logger.info(f"Данные категорий: {data}")
-                    logger.info(f"Тип данных категорий: {type(data)}")
+                    # logger.info(f"Данные категорий: {data}")
+                    # logger.info(f"Тип данных категорий: {type(data)}")
                     
                     return data
 

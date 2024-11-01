@@ -9,11 +9,39 @@
     <!-- Кнопка для вызова модального окна добавления нового товара -->
     <button id="add-product-btn" class="add-product-btn">Добавить новый товар</button>
 
+    <!-- Модальное окно для добавления нового товара -->
+    <div id="add-product-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close-btn_add-modal">&times;</span>
+            <h2>Добавить новый товар</h2>
+            <form id="add-product-form" action="#" method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                <!-- Поля формы для добавления товара -->
+                <input type="text" id="name" name="product_name" placeholder="Название" required>
+
+                <input type="text" id="add-category" name="add-category" placeholder="Введите категорию" required>
+
+                <label for="category">Выберите существующую категорию:</label>
+                <select id="category" id="category" name="category">
+                    <option value=""disabled selected>-- Выберите категорию --</option>
+                </select>
+                
+                <textarea name="description" id="description" placeholder="Описание" required></textarea>
+                <input type="number" name="price" id="price" placeholder="Цена" required>
+                <input type="number" name="stock" id="stock" placeholder="В наличии" required>
+                <input type="file" name="image" id="image" accept="image/*">
+                <button type="submit">Добавить</button>
+            </form>
+        </div>
+    </div>
+
 
     <!-- Таблица товаров -->
     <div class="table-container ">
         <table>
             <tr>
+                <th>№</th>
                 <th>ID</th>
                 <th>Изображение</th>
                 <th>Название</th>
@@ -25,9 +53,14 @@
             </tr>
             {% for product in products %}
             <tr>
+                <td>{{ loop.index }}</td>
                 <td>{{ product.id }}</td>
                 <td>
-                    <img src="{{ url_for('static', filename=product.image) }}" alt="{{ product.image }}"  width="150">
+                    {% if product.image %}
+                        <img src="{{ url_for('static', filename='/images/' + product.image) }}" alt="{{ product.image }}"  width="150">
+                    {% else %}
+                        <span>Изображение отсутствует</span>
+                    {% endif %}
                 </td>
                 <td>{{ product.name }}</td>
                 <td>{{ product.category }}</td>
@@ -57,25 +90,26 @@
     </div>
 </div>
 
-
- <!-- Модальное окно для редактирования товара -->
+    <!-- Модальное окно для редактирования товара -->
     <div id="edit-product-modal" class="modal">
         <div class="modal-content">
             <span class="close-btn">&times;</span>
             <h2>Редактировать товар</h2>
-            <form id="edit-product-form" action="#" method="POST" enctype="multipart/form-data">
+            <form id="edit-product-form" action="" method="POST" enctype="multipart/form-data">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <input type="hidden" id="edit-id" name="id">
 
                 <label for="edit-name">Название:</label>
                 <input type="text" id="edit-name" name="product_name" required>
 
-                <label for="edit-category">Категория:</label>
-                <input type="text" id="edit-category" name="category" required>
+                <label for="edit-category">Изменить категорию:</label>
+                <input type="text" id="edit-category" name="edit-category" required>
 
-                <label for="category">Выберите категорию:</label>
+                <label for="category">Выберите категорию для изменения:</label>
                 <select id="category" name="category">
+                    <option value=""disabled selected>-- Выберите категорию --</option>
                 </select>
+                
                 <label for="edit-description">Описание:</label>
                 <textarea id="edit-description" name="description" required></textarea>
 
@@ -93,13 +127,10 @@
         </div>
     </div>
 
-
-
-
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('static', filename='js/products.js') }}" defer></script>
+<script src="{{ url_for('static', filename='js/products.js') }}"></script>
 <script>
     // Обработчик дублирования товара
     document.querySelectorAll('.duplicate-btn').forEach(button => {
