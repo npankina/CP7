@@ -20,25 +20,63 @@ document.addEventListener('DOMContentLoaded', function() {
     const editProductBtns = document.querySelectorAll('.edit-product-btn');
     const editForm = document.getElementById('edit-product-form');
 
+    // Функция для открытия модального окна и заполнения формы
+    function openEditModal(button) {
+        const productId = button.getAttribute('data-id');
+        const productName = button.getAttribute('data-name');
+        const productCategory = button.getAttribute('data-category');
+        const productDescription = button.getAttribute('data-description');
+        const productPrice = button.getAttribute('data-price');
+        const productStock = button.getAttribute('data-stock');
+
+        // Заполнение формы текущими данными
+        document.getElementById('edit-id').value = productId;
+        document.getElementById('edit-name').value = productName;
+        document.getElementById('edit-description').value = productDescription;
+        document.getElementById('edit-price').value = productPrice;
+        document.getElementById('edit-stock').value = productStock;
+
+        // Загрузка категорий
+        fetch('/admin/products/categories')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Ошибка при загрузке категорий');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const categorySelect = document.getElementById('edit-category');
+                categorySelect.innerHTML = ''; // Очистка предыдущих значений
+
+                // Добавление пустого поля
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.disabled = true;
+                defaultOption.textContent = '-- Выберите категорию --';
+                categorySelect.appendChild(defaultOption);
+
+                // Добавление загруженных категорий
+                data.categories.forEach(category => {
+                    const option = document.createElement('option');
+                    option.value = category.id; // Убедитесь, что используете правильное поле
+                    option.textContent = category.name;
+                    if (category.name === productCategory) {
+                        option.selected = true;
+                    }
+                    categorySelect.appendChild(option);
+                });
+            })
+            .catch(error => {
+                console.error('Ошибка при загрузке категорий:', error);
+            });
+
+        editProductModal.style.display = 'block';
+    }
+
     // Открытие модального окна для редактирования
     editProductBtns.forEach(button => {
         button.addEventListener('click', function() {
-            const productId = this.getAttribute('data-id');
-            const productName = this.getAttribute('data-name');
-            const productCategory = this.getAttribute('data-category');
-            const productDescription = this.getAttribute('data-description');
-            const productPrice = this.getAttribute('data-price');
-            const productStock = this.getAttribute('data-stock');
-
-            // Заполнение формы текущими данными
-            document.getElementById('edit-id').value = productId;
-            document.getElementById('edit-name').value = productName;
-            document.getElementById('edit-category').value = productCategory;
-            document.getElementById('edit-description').value = productDescription;
-            document.getElementById('edit-price').value = productPrice;
-            document.getElementById('edit-stock').value = productStock;
-
-            editProductModal.style.display = 'block';
+            openEditModal(this);
         });
     });
 
@@ -76,62 +114,6 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Ошибка:', error);
             alert('Произошла ошибка при выполнении запроса');
         });
-    });
-});
-//--------------------------------------------------------------------------------------------------------------
-document.querySelectorAll('.edit-product-btn').forEach(button => {
-    button.addEventListener('click', function() {
-        const modal = document.getElementById('edit-product-modal');
-        modal.style.display = 'block';
-
-        // Получение данных товара
-        const productId = this.getAttribute('data-id');
-        const productName = this.getAttribute('data-name');
-        const productCategory = this.getAttribute('data-category');
-        const productDescription = this.getAttribute('data-description');
-        const productPrice = this.getAttribute('data-price');
-        const productStock = this.getAttribute('data-stock');
-
-        // Заполнение формы текущими данными
-        document.getElementById('edit-id').value = productId;
-        document.getElementById('edit-name').value = productName;
-        document.getElementById('edit-description').value = productDescription;
-        document.getElementById('edit-price').value = productPrice;
-        document.getElementById('edit-stock').value = productStock;
-
-        // Загрузка категорий
-        fetch('/admin/products/categories')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Ошибка при загрузке категорий');
-                }
-                return response.json();
-            })
-            .then(data => {
-                const categorySelect = document.getElementById('category');
-                categorySelect.innerHTML = ''; // Очистка предыдущих значений
-
-                // Добавление пустого поля
-                const defaultOption = document.createElement('option');
-                defaultOption.value = '';
-                defaultOption.disabled = true;
-                defaultOption.textContent = '-- Выберите категорию --';
-                categorySelect.appendChild(defaultOption);
-
-                // Добавление загруженных категорий
-                data.categories.forEach(category => {
-                    const option = document.createElement('option');
-                    option.value = category.id; // Убедитесь, что используете правильное поле
-                    option.textContent = category.name;
-                    if (category.name === productCategory) {
-                        option.selected = true;
-                    }
-                    categorySelect.appendChild(option);
-                });
-            })
-            .catch(error => {
-                console.error('Ошибка при загрузке категорий:', error);
-            });
     });
 });
 //-----------------------------------------------------------------------------------------------------------

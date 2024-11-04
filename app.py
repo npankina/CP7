@@ -149,13 +149,13 @@ def categories():
 @app.route('/admin/products/edit/<int:product_id>', methods=['POST'])
 def edit_product(product_id):
     try:
-        product_id = request.form.get('id')
         image = request.files.get('image')
 
-        if image and allowed_file(image.filename):
-            filename = secure_filename(image.filename)
-            image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            image.save(image_path)
+        if image:
+            if image and allowed_file(image.filename):
+                filename = secure_filename(image.filename)
+                image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                image.save(image_path)
             
 
         updates = {}
@@ -163,9 +163,6 @@ def edit_product(product_id):
             if key != 'csrf_token' and key != 'id':
                 updates[key] = value
         
-        if updates:
-            return 
-
         print(updates)
 
         success = Requests.edit_product(product_id, updates)
