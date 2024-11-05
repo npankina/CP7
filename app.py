@@ -29,7 +29,7 @@ def home():
 def admin_panel():
     return  {"message": "Hello, Admin!!"}
 #----------------------------------------------------------------------------------------------------
-@app.route('/admin/products')
+@app.route('/admin/products', methods=['GET'])
 def admin_products():
     data = Requests.get_products()
     if not data:
@@ -84,27 +84,54 @@ def delete_product(product_id):
 @app.route('/admin/products/add', methods=['POST'])
 def add_product():
     try:
+        # Логируем полученные данные для отладки
+        logger.info(f"Получены данные для добавления товара: {request.form}")
+        logger.info(f"Получены файлы для добавления товара: {request.files}")
+        
+        # Обработка изображения
         image = request.files.get('image')
-        image_path = None
-
         if image and allowed_file(image.filename):
-            image_path = os.path.join(app.config['UPLOAD_FOLDER'], image.filename)
+            image_filename = secure_filename(image.filename)
+            image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             image.save(image_path)
-            print(image_path)
-            print(image.filename)
-        
 
-        product_data = {
-            'name': request.form.get('product_name'),
-            'description': request.form.get('description'),
-            'price': request.form.get('price'),
-            'stock': request.form.get('stock'),
-            'category': request.form.get('category'),
-            'image_name': image.filename
-
+        field_mapping = {
+            'product_name': 'name',
+            'description': 'description',
+            'price': 'price',
+            'stock': 'stock',
+            'category': 'category',
+            'image': 'image'  
         }
-        # print(product_data)
+
+       # Сбор данных из формы
+        product_data = {}
+        for form_field, db_field in field_mapping.items():
+            value = request.form.get(form_field)
+            if value:
+                # Преобразование типов данных
+                if db_field in ['price', 'stock_quantity']:
+                    value = float(value) if db_field == 'price' else int(value)
+                if db_field == 'category_id' and value:
+                    value = int(value)
+                product_data[db_field] = value
+
+        if image:
+            product_data['image'] = image_filename
         
+        logger.info(f"Подготовленные данные продукта: {product_data}")
+        print(product_data)
+
+         # Проверка обязательных полей
+        required_fields = ['name', 'description', 'price', 'stock', 'category']
+        missing_fields = [field for field in required_fields if field not in product_data]
+        if missing_fields:
+            return jsonify({
+                'success': False,
+                'message': f'Отсутствуют обязательные поля: {", ".join(missing_fields)}'
+            }), 400
+        
+        # Добавление продукта
         success = Requests.add_product(product_data)
         if success:
             return jsonify({
@@ -118,6 +145,13 @@ def add_product():
             }), 400
 
 
+    except ValueError as ve:
+        logger.error(f"Ошибка при добавлении товара: {str(ve)}")
+        return jsonify({
+            'success': False,
+            'message': 'Произошла ошибка при добавлении товара'
+        }), 500
+    
     except Exception as e:
         logger.error(f"Ошибка при добавлении товара: {str(e)}")
         return jsonify({
@@ -125,7 +159,7 @@ def add_product():
             'message': 'Произошла ошибка при добавлении товара'
         }), 500
 #----------------------------------------------------------------------------------------------------
-@app.route('/admin/products/categories')
+@app.route('/admin/products/categories', methods=['GET'])
 def categories():
     try:
         success = Requests.get_categories()
@@ -146,24 +180,79 @@ def categories():
         logger.error(f"Ошибка при получении категорий: {str(e)}")
         return {"message": "Произошла ошибка при получении категорий"}
 #----------------------------------------------------------------------------------------------------
+@app.route('/admin/products/categories/add', methods=['POST'])
+def add_category():
+    try:
+        data = request.get_json()
+        logger.info(f"Полученные данные: {data}")
+
+        if not data or 'category_name' not in data:
+            return jsonify({
+                'success': False,
+                'message': 'Отсутствует название категории'
+            }), 400
+    
+        category_name = data['category_name']
+        logger.info(f"category_name: {category_name}")
+
+        if not category_name:
+            return jsonify({
+                'success': False,
+                'message': 'Название категории не может быть пустым'
+            }), 400
+
+        success = Requests.add_new_category(category_name)
+        if not success:
+            return jsonify({
+                'success': False,
+                'message': 'Не удалось добавить категорию'
+            }), 400
+        
+        category_id = Requests.get_category_id(category_name)
+        if success:
+            return jsonify({
+                'success': True,
+                'message': 'Категория успешно добавлена',
+                'category_id': category_id
+            }), 200
+        
+    except Exception as e:
+        logger.error(f"Ошибка при добавлении категории: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': 'Произошла ошибка при добавлении категории'
+        }), 500
+#----------------------------------------------------------------------------------------------------
 @app.route('/admin/products/edit/<int:product_id>', methods=['POST'])
 def edit_product(product_id):
     try:
         image = request.files.get('image')
+       
+        if image and allowed_file(image.filename):
+            filename = secure_filename(image.filename)
+            image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            image.save(image_path)
+        
 
-        if image:
-            if image and allowed_file(image.filename):
-                filename = secure_filename(image.filename)
-                image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                image.save(image_path)
-            
+        field_mapping = {
+            'product_name': 'name',
+            'description': 'description',
+            'price': 'price',
+            'stock': 'stock_quantity',
+            'category': 'category_id',
+            'image_name': 'image'  
+        }
 
         updates = {}
-        for key, value in request.form.items():
-            if key != 'csrf_token' and key != 'id':
-                updates[key] = value
+        for form_field, db_field in field_mapping.items():
+           value = request.form.get(form_field)
+           if value:
+               updates[db_field] = value
+
+        if image:
+            updates['image_name'] = image.filename
         
-        print(updates)
+        # print(updates)
 
         success = Requests.edit_product(product_id, updates)
         if success:
@@ -188,7 +277,7 @@ def edit_product(product_id):
 def logout():
     return render_template('logout.html')
 #----------------------------------------------------------------------------------------------------
-@app.route('/admin/orders')
+@app.route('/admin/orders', methods=['GET'])
 def admin_orders():
     data = Requests.get_orders()
     
@@ -198,7 +287,7 @@ def admin_orders():
 
     return render_template('admin-orders.html', orders=data)
 #----------------------------------------------------------------------------------------------------
-@app.route('/admin/users')
+@app.route('/admin/users', methods=['GET'])
 def admin_users():
     data = Requests.get_users()
     if not data:
@@ -206,7 +295,7 @@ def admin_users():
         return {"message": "Нет доступных пользователей"}
     return render_template('admin-users.html', users=data)
 #----------------------------------------------------------------------------------------------------
-@app.route('/admin/settings')
+@app.route('/admin/settings', methods=['GET'])
 def admin_settings():
     return  {"message": "Hello, Admin!!"}
 #----------------------------------------------------------------------------------------------------

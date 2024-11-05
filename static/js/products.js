@@ -20,63 +20,25 @@ document.addEventListener('DOMContentLoaded', function() {
     const editProductBtns = document.querySelectorAll('.edit-product-btn');
     const editForm = document.getElementById('edit-product-form');
 
-    // Функция для открытия модального окна и заполнения формы
-    function openEditModal(button) {
-        const productId = button.getAttribute('data-id');
-        const productName = button.getAttribute('data-name');
-        const productCategory = button.getAttribute('data-category');
-        const productDescription = button.getAttribute('data-description');
-        const productPrice = button.getAttribute('data-price');
-        const productStock = button.getAttribute('data-stock');
-
-        // Заполнение формы текущими данными
-        document.getElementById('edit-id').value = productId;
-        document.getElementById('edit-name').value = productName;
-        document.getElementById('edit-description').value = productDescription;
-        document.getElementById('edit-price').value = productPrice;
-        document.getElementById('edit-stock').value = productStock;
-
-        // Загрузка категорий
-        fetch('/admin/products/categories')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Ошибка при загрузке категорий');
-                }
-                return response.json();
-            })
-            .then(data => {
-                const categorySelect = document.getElementById('edit-category');
-                categorySelect.innerHTML = ''; // Очистка предыдущих значений
-
-                // Добавление пустого поля
-                const defaultOption = document.createElement('option');
-                defaultOption.value = '';
-                defaultOption.disabled = true;
-                defaultOption.textContent = '-- Выберите категорию --';
-                categorySelect.appendChild(defaultOption);
-
-                // Добавление загруженных категорий
-                data.categories.forEach(category => {
-                    const option = document.createElement('option');
-                    option.value = category.id; // Убедитесь, что используете правильное поле
-                    option.textContent = category.name;
-                    if (category.name === productCategory) {
-                        option.selected = true;
-                    }
-                    categorySelect.appendChild(option);
-                });
-            })
-            .catch(error => {
-                console.error('Ошибка при загрузке категорий:', error);
-            });
-
-        editProductModal.style.display = 'block';
-    }
-
     // Открытие модального окна для редактирования
     editProductBtns.forEach(button => {
         button.addEventListener('click', function() {
-            openEditModal(this);
+            const productId = this.getAttribute('data-id');
+            const productName = this.getAttribute('data-name');
+            const productCategory = this.getAttribute('data-category');
+            const productDescription = this.getAttribute('data-description');
+            const productPrice = this.getAttribute('data-price');
+            const productStock = this.getAttribute('data-stock');
+
+            // Заполнение формы текущими данными
+            document.getElementById('edit-id').value = productId;
+            document.getElementById('edit-name').value = productName;
+            document.getElementById('edit-category').value = productCategory;
+            document.getElementById('edit-description').value = productDescription;
+            document.getElementById('edit-price').value = productPrice;
+            document.getElementById('edit-stock').value = productStock;
+
+            editProductModal.style.display = 'block';
         });
     });
 
@@ -86,33 +48,53 @@ document.addEventListener('DOMContentLoaded', function() {
             if (confirm('Вы уверены, что хотите закрыть окно без сохранения изменений?')) {
                 editProductModal.style.display = 'none';
             }
+            clearEditForm();
         });
-    });
+        
+    // Очистка формы при закрытии модального окна
+    function clearEditForm() {
+        document.getElementById('edit-id').value = '';
+        document.getElementById('edit-name').value = '';
+        document.getElementById('edit-category').value = '';
+        document.getElementById('edit-description').value = '';
+        document.getElementById('edit-price').value = '';
+        document.getElementById('edit-stock').value = '';
+        document.getElementById('edit-image').value = '';
+    }
+   });
 
     // Обработка отправки формы
     editForm.addEventListener('submit', function(event) {
         event.preventDefault();
         const formData = new FormData(editForm);
+        const productId = document.getElementById('edit-id').value;
 
-        fetch('/admin/products/edit', {
+        fetch(`/admin/products/edit/${productId}`, {
             method: 'POST',
             body: formData,
             headers: {
                 'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
             }
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(data => {
+                    throw new Error(data.message || 'Ошибка при редактировании товара.');
+                });
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.success) {
-                alert('Товар успешно обновлен');
+                alert('Товар успешно отредактирован.');
                 location.reload();
             } else {
-                alert(data.message || 'Ошибка при обновлении товара');
+                alert(data.message || 'Ошибка при редактировании товара');
             }
         })
         .catch(error => {
             console.error('Ошибка:', error);
-            alert('Произошла ошибка при выполнении запроса');
+            alert(error.message || 'Произошла ошибка при выполнении запроса.');
         });
     });
 });
@@ -120,9 +102,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
-
 //--------------------------------------------------------------------------------------------------------------
 // Обработчик добавления товара
+//--------------------------------------------------------------------------------------------------------------
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('add-product-form');
     const categorySelect = document.getElementById('category');
@@ -137,14 +119,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    form.addEventListener('submit', function(event) {
-        // Предотвращаем отправку формы по умолчанию
+    // Единый обработчик отправки формы
+    form.addEventListener('submit', async function(event) {
         event.preventDefault();
 
         // Получаем значения полей
         const name = document.getElementById('name').value.trim();
         const category = categorySelect.value;
-        const editCategory = editCategoryInput.value.trim();
+        const newCategory = editCategoryInput.value.trim();
         const description = document.getElementById('description').value.trim();
         const price = document.getElementById('price').value.trim();
         const stock = document.getElementById('stock').value.trim();
@@ -154,7 +136,7 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Пожалуйста, введите название товара.');
             return;
         }
-        if (!category && !editCategory) {
+        if (!category && !newCategory) {
             alert('Пожалуйста, выберите категорию из списка или введите новую.');
             return;
         }
@@ -171,9 +153,26 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // Создаем FormData из формы
+        // Создаем FormData для отправки данных
         const formData = new FormData(form);
 
+        // Если есть новая категория, создаём её
+        if (newCategory) {
+            try {
+                const categoryResult = await createNewCategory(newCategory);
+                if (categoryResult.success) {
+                    formData.set('category', categoryResult.category_id);
+                } else {
+                    alert('Ошибка при создании категории');
+                    return;
+                }
+            } catch (error) {
+                alert('Ошибка при создании категории');
+                return;
+            }
+        }
+
+        // Отправка данных товара
         fetch('/admin/products/add', {
             method: 'POST',
             body: formData,
@@ -190,7 +189,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(data => {
             if (data.success) {
                 alert('Товар успешно добавлен');
-                location.reload();  // Обновление страницы
+                location.reload();
             } else {
                 alert(data.message || 'Ошибка при добавлении товара');
             }
@@ -200,7 +199,56 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Произошла ошибка при выполнении запроса');
         });
     });
+
+    // Функция создания новой категории остаётся без изменений
+    async function createNewCategory(categoryName) {
+        try {
+            // Добавим проверку
+            if (!categoryName) {
+                throw new Error('Название категории не может быть пустым');
+            }
+    
+            const requestData = {
+                category_name: categoryName
+            };
+            
+            console.log('Отправляемые данные категории:', requestData); // Отладка
+    
+            const response = await fetch('/admin/products/categories/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
+                },
+                body: JSON.stringify(requestData)
+            });
+    
+            const data = await response.json();
+            console.log('Ответ сервера:', data); // Отладка
+    
+            if (!response.ok) {
+                throw new Error(data.message || 'Ошибка при создании категории');
+            }
+    
+            return data;
+        } catch (error) {
+            console.error('Ошибка при создании категории:', error);
+            throw error;
+        }
+    }
 });
+//--------------------------------------------------------------------------------------------------------------
+
+//--------------------------------------------------------------------------------------------------------------
+ // Очистка формы при закрытии модального окна
+ function clearAddForm() {
+    document.getElementById('name').value = '';
+    document.getElementById('category').value = '';
+    document.getElementById('description').value = '';
+    document.getElementById('price').value = '';
+    document.getElementById('stock').value = '';
+    document.getElementById('image').value = '';
+}
 //--------------------------------------------------------------------------------------------------------------
 // Обработчик закрытия модального окна с подтверждением
 document.querySelector('.close-btn_add-modal').addEventListener('click', function() {
@@ -209,6 +257,7 @@ document.querySelector('.close-btn_add-modal').addEventListener('click', functio
 
     if (confirmClose) {
         modal.style.display = 'none'; // Закрытие модального окна
+        clearAddForm();
     }
 });
 //--------------------------------------------------------------------------------------------------------------
@@ -219,16 +268,7 @@ document.getElementById('add-product-btn').addEventListener('click', function() 
     modal.style.display = 'block';
    
     // Очистка формы
-    document.getElementById('name').value = '';
-    document.getElementById('category').value = '';
-    document.getElementById('description').value = '';
-    document.getElementById('price').value = '';
-    document.getElementById('stock').value = '';
-    document.getElementById('image').value = '';
-
-    // Изменение заголовка и кнопки формы
-    modal.querySelector('h2').textContent = 'Добавить новый товар';
-    // modal.querySelector('.submit-btn').textContent = 'Добавить';
+    clearAddForm();
 
     // Загрузка категорий
     fetch('/admin/products/categories')

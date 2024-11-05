@@ -220,6 +220,7 @@ class Requests:
             return False
 
         set_clause = ', '.join(f"{key} = %s" for key in updates.keys())
+        # print(set_clause)
         query = f"UPDATE Products SET {set_clause} WHERE id = %s;"
 
         conn = None
@@ -251,25 +252,35 @@ class Requests:
             logger.info(f"Тип product_data: {type(product_data)}")
             logger.info(f"Содержимое product_data: {product_data}")
         
-        if not 'image_name' in product_data:
-            image_name = None
+        if not 'image' in product_data:
+            image = None
 
         product_name = product_data['name']
         product_description = product_data['description']
         product_price = float(product_data['price'])
         product_stock = int(product_data['stock'])
         product_category = int(product_data['category'])
-        image_name = product_data['image_name']
+        image = product_data['image']
 
-        query = """INSERT INTO Products (name, description, price, stock_quantity, category_id, image_name)
+        if not image:
+            image = None
+        
+        print(f"product_name: {product_name}, product_description: {product_description}, product_price: {product_price}, product_stock: {product_stock}, product_category: {product_category}, image: {image}")
+
+        query_with_img = """INSERT INTO Products (name, description, price, stock_quantity, category_id, image_name)
                 VALUES (%s, %s, %s, %s, %s, %s);"""
+        query_without_img = """INSERT INTO Products (name, description, price, stock_quantity, category_id)
+                VALUES (%s, %s, %s, %s, %s);"""
         conn = None
         cursor = None
 
         try:
             with connect_to_db() as conn:
                 with conn.cursor() as cursor:
-                    cursor.execute(query, (product_name, product_description, product_price, product_stock, product_category, image_name))
+                    if image is None:
+                        cursor.execute(query_without_img, (product_name, product_description, product_price, product_stock, product_category))
+                    else:
+                        cursor.execute(query_with_img, (product_name, product_description, product_price, product_stock, product_category, image))
                     conn.commit()
                     return True
 
@@ -305,6 +316,54 @@ class Requests:
         except Exception as e:
             logger.error(f"Ошибка при выполнении запроса к БД для выборки всех категорий: {e}")
             raise
+        
+        finally:
+            if cursor:
+                cursor.close()
+            if conn:
+                conn.close()
+#----------------------------------------------------------------------------------------------------
+    @staticmethod
+    def add_new_category(category_name):
+        query = "INSERT INTO Categories (name, is_deleted) VALUES (%s, %s);"
+        conn = None
+        cursor = None
+
+        print(f"category_name: {category_name}")
+        
+        try:
+            with connect_to_db() as conn:
+                with conn.cursor() as cursor:
+                    cursor.execute(query, (category_name, False))
+                    conn.commit()
+                    return True
+            
+        except Exception as e:
+            logger.error(f"Ошибка при добавлении новой категории: {str(e)}")
+            return False
+
+        finally:
+            if cursor:
+                cursor.close()
+            if conn:
+                conn.close()
+#----------------------------------------------------------------------------------------------------
+    @staticmethod
+    def get_category_id(category_name):
+        query = "SELECT id FROM Categories WHERE name = %s;"
+        conn = None
+        cursor = None
+
+        try:
+            with connect_to_db() as conn:
+                with conn.cursor() as cursor:
+                    cursor.execute(query, (category_name,))
+                    result = cursor.fetchone()
+                    return result[0] if result else None
+        
+        except Exception as e:
+            logger.error(f"Ошибка при выполнении запроса к БД для получения id категории: {e}")
+            return None
         
         finally:
             if cursor:

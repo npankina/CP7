@@ -22,7 +22,6 @@ CREATE TABLE Users (
 CREATE TABLE Categories (
     id SERIAL PRIMARY KEY,
     name VARCHAR(30) NOT NULL,
-    description VARCHAR(255),
     parent_id INTEGER REFERENCES Categories(id) ON DELETE SET NULL,
     is_deleted BOOLEAN DEFAULT FALSE,
     deleted_at TIMESTAMP,
