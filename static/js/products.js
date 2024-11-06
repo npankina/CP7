@@ -238,10 +238,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 //--------------------------------------------------------------------------------------------------------------
-
-//--------------------------------------------------------------------------------------------------------------
- // Очистка формы при закрытии модального окна
- function clearAddForm() {
+// Очистка формы при закрытии модального окна
+function clearAddForm() {
     document.getElementById('name').value = '';
     document.getElementById('category').value = '';
     document.getElementById('description').value = '';
@@ -302,5 +300,161 @@ document.getElementById('add-product-btn').addEventListener('click', function() 
         .catch(error => {
             console.error('Ошибка при загрузке категорий:', error);
         });
+});
+//--------------------------------------------------------------------------------------------------------------
+
+
+
+//--------------------------------------------------------------------------------------------------------------
+// Обработчик поиска товаров
+document.getElementById('search-btn').addEventListener('click', function() {
+    const searchQuery = document.getElementById('product-search').value;
+    const searchType = document.getElementById('search-filter').value;
+
+    // Если поле поиска пустое - получаем все товары
+    if (!searchQuery.trim()) {
+        location.reload();
+        return;
+    }
+
+    fetch('/admin/products/search', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
+        },
+        body: JSON.stringify({
+            query: searchQuery,         // Изменено с search_query
+            type: searchType           // Изменено с search_type
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Ошибка при поиске');
+        }
+        return response.json();
+    })
+    .then(data => {
+        const tableBody = document.querySelector('table tbody');
+        tableBody.innerHTML = ''; // Очищаем текущие результаты
+
+        if (data && Array.isArray(data) && data.length > 0) {  // Изменена проверка данных
+            data.forEach((product, index) => {
+                tableBody.innerHTML += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${product[0]}</td>
+                        <td>${product[6] ? 
+                            `<img src="/static/images/${product[6]}" alt="${product[6]}" width="150">` : 
+                            '<span>Изображение отсутствует</span>'
+                        }</td>
+                        <td>${product[1]}</td>
+                        <td>${product[2]}</td>
+                        <td>${product[3]}</td>
+                        <td>${product[4]} руб.</td>
+                        <td>${product[5]}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="edit-product-btn" 
+                                    data-id="${product[0]}"
+                                    data-name="${product[1]}"
+                                    data-category="${product[2]}"
+                                    data-description="${product[3]}"
+                                    data-price="${product[4]}"
+                                    data-stock="${product[5]}"
+                                    data-image="${product[6] || ''}">Редактировать</button>
+                                <button class="duplicate-btn" data-id="${product[0]}">Дублировать</button>
+                                <button class="delete-btn" data-id="${product[0]}">Удалить</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+        } else {
+            tableBody.innerHTML = '<tr><td colspan="9">Ничего не найдено</td></tr>';
+        }
+
+        attachEventHandlers();
+    })
+    .catch(error => {
+        console.error('Ошибка:', error);
+        alert('Произошла ошибка при поиске');
+    });
+});
+//--------------------------------------------------------------------------------------------------------------
+// Функция для прикрепления обработчиков событий
+function attachEventHandlers() {
+    // Переприкрепляем обработчики для кнопок редактирования
+    document.querySelectorAll('.edit-product-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            // Ваш существующий код обработчика редактирования
+        });
+    });
+
+    // Переприкрепляем обработчики для кнопок дублирования
+    document.querySelectorAll('.duplicate-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            // Ваш существующий код обработчика дублирования
+        });
+    });
+
+    // Переприкрепляем обработчики для кнопок удаления
+    document.querySelectorAll('.delete-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            // Ваш существующий код обработчика удаления
+        });
+    });
+}
+//--------------------------------------------------------------------------------------------------------------
+// Добавляем слушатель события input для поля поиска
+document.getElementById('product-search').addEventListener('input', function() {
+    // Если поле пустое
+    if (!this.value.trim()) {
+        // Делаем запрос к серверу для получения всех товаров
+        fetch('/admin/products/get_all', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            const tableBody = document.querySelector('table tbody');
+            tableBody.innerHTML = ''; // Очищаем текущие результаты
+
+            if (Array.isArray(data)) {
+                data.forEach((product, index) => {
+                    tableBody.innerHTML += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${product.id}</td>
+                            <td>${product.image ? 
+                                `<img src="/static/images/${product.image}" alt="${product.image}" width="150">` : 
+                                '<span>Изображение отсутствует</span>'
+                            }</td>
+                            <td>${product.name}</td>
+                            <td>${product.category}</td>
+                            <td>${product.description}</td>
+                            <td>${product.price} руб.</td>
+                            <td>${product.stock}</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="edit-product-btn" data-id="${product.id}">Редактировать</button>
+                                    <button class="duplicate-btn" data-id="${product.id}">Дублировать</button>
+                                    <button class="delete-btn" data-id="${product.id}">Удалить</button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+            attachEventHandlers();
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+            alert('Произошла ошибка при получении данных');
+        });
+    }
 });
 //--------------------------------------------------------------------------------------------------------------

@@ -252,35 +252,23 @@ class Requests:
             logger.info(f"Тип product_data: {type(product_data)}")
             logger.info(f"Содержимое product_data: {product_data}")
         
-        if not 'image' in product_data:
-            image = None
-
-        product_name = product_data['name']
-        product_description = product_data['description']
-        product_price = float(product_data['price'])
-        product_stock = int(product_data['stock'])
-        product_category = int(product_data['category'])
-        image = product_data['image']
-
-        if not image:
-            image = None
+        if not product_data:
+            logger.error(f"Не переданы данные для добавления товара")
+            return False
         
-        print(f"product_name: {product_name}, product_description: {product_description}, product_price: {product_price}, product_stock: {product_stock}, product_category: {product_category}, image: {image}")
+        columns = ', '.join(product_data.keys())
+        values = ', '.join(f"'{value}'" for value in product_data.values())
+        query = f"INSERT INTO Products ({columns}) VALUES ({values});"
 
-        query_with_img = """INSERT INTO Products (name, description, price, stock_quantity, category_id, image_name)
-                VALUES (%s, %s, %s, %s, %s, %s);"""
-        query_without_img = """INSERT INTO Products (name, description, price, stock_quantity, category_id)
-                VALUES (%s, %s, %s, %s, %s);"""
+        logger.info(f"query: {query}")
+        
         conn = None
         cursor = None
 
         try:
             with connect_to_db() as conn:
                 with conn.cursor() as cursor:
-                    if image is None:
-                        cursor.execute(query_without_img, (product_name, product_description, product_price, product_stock, product_category))
-                    else:
-                        cursor.execute(query_with_img, (product_name, product_description, product_price, product_stock, product_category, image))
+                    cursor.execute(query, tuple(product_data.values()))
                     conn.commit()
                     return True
 
@@ -371,4 +359,46 @@ class Requests:
             if conn:
                 conn.close()
 #----------------------------------------------------------------------------------------------------
+    @staticmethod
+    def search_products(search_query, search_filter):
+        if not search_query:
+            logger.error(f"Не передан поисковый запрос для поиска товаров")
+            return None
+        
+        logger.info(f"search_filter: {search_filter}")
+        logger.info(f"search_query: {search_query}")
 
+        # Словарь для выбора поля поиска
+        search_fields = {
+            'name': "SELECT * FROM Products WHERE name LIKE %s;",
+            'category': "SELECT * FROM Products WHERE category_id = %s;",
+            'description': "SELECT * FROM Products WHERE description LIKE %s;",
+            'price': "SELECT * FROM Products WHERE price = %s;",
+            'stock': "SELECT * FROM Products WHERE stock_quantity = %s;"
+        }
+
+        query = search_fields.get(search_filter)
+        if not query:
+            logger.error(f"Не передан параметр для поиска товаров")
+            return None
+        
+        conn = None
+        cursor = None
+
+        try:
+            with connect_to_db() as conn:
+                with conn.cursor() as cursor:
+                    cursor.execute(query, (search_query,))
+                    result = cursor.fetchall()
+                    return result
+
+        except Exception as e:
+            logger.error(f"Ошибка при выполнении запроса к БД для поиска товаров: {e}")
+            return None
+        
+        finally:
+            if cursor:
+                cursor.close()
+            if conn:
+                conn.close()
+#----------------------------------------------------------------------------------------------------

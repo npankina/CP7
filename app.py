@@ -92,45 +92,25 @@ def add_product():
         image = request.files.get('image')
         if image and allowed_file(image.filename):
             image_filename = secure_filename(image.filename)
-            image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            image_path = os.path.join(app.config['UPLOAD_FOLDER'], image_filename)
             image.save(image_path)
 
-        field_mapping = {
+        mapping_fields = {
             'product_name': 'name',
             'description': 'description',
             'price': 'price',
-            'stock': 'stock',
-            'category': 'category',
-            'image': 'image'  
+            'stock': 'stock_quantity',
+            'category': 'category_id',
+            'image_name': 'image_name'
         }
 
-       # Сбор данных из формы
         product_data = {}
-        for form_field, db_field in field_mapping.items():
+        for form_field, db_field in mapping_fields.items():
             value = request.form.get(form_field)
             if value:
-                # Преобразование типов данных
-                if db_field in ['price', 'stock_quantity']:
-                    value = float(value) if db_field == 'price' else int(value)
-                if db_field == 'category_id' and value:
-                    value = int(value)
                 product_data[db_field] = value
 
-        if image:
-            product_data['image'] = image_filename
-        
-        logger.info(f"Подготовленные данные продукта: {product_data}")
-        print(product_data)
-
-         # Проверка обязательных полей
-        required_fields = ['name', 'description', 'price', 'stock', 'category']
-        missing_fields = [field for field in required_fields if field not in product_data]
-        if missing_fields:
-            return jsonify({
-                'success': False,
-                'message': f'Отсутствуют обязательные поля: {", ".join(missing_fields)}'
-            }), 400
-        
+        logger.info(f"product_data: {product_data}")
         # Добавление продукта
         success = Requests.add_product(product_data)
         if success:
@@ -273,6 +253,40 @@ def edit_product(product_id):
             'message': 'Произошла ошибка при редактировании товара'
         }), 500
 #----------------------------------------------------------------------------------------------------
+@app.route('/admin/products/search', methods=['POST'])
+def search_products():
+    try:
+        search_query = request.form.get('search_query')
+        search_filter = request.form.get('search_filter')
+        data = Requests.search_products(search_query, search_filter)
+        
+        if not data:
+            return jsonify({
+                'success': False,
+                'message': 'Товары не найдены'
+            }), 400
+        else:
+            return jsonify({
+                'success': True,
+                'products': data,
+                'message': 'Товары успешно найдены'
+            }), 200
+    
+    except Exception as e:
+        logger.error(f"Ошибка при поиске товаров: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': 'Произошла ошибка при поиске товаров'
+        }), 500
+#----------------------------------------------------------------------------------------------------
+@app.route('/admin/products/get_all', methods=['GET'])
+def get_all_products():
+    try:
+        products = Requests.get_products()
+        return jsonify(products), 200
+    except Exception as e:
+        logger.error(f"Ошибка при получении всех товаров: {str(e)}")
+        return jsonify({'error': 'Произошла ошибка при получении данных'}), 500
 @app.route('/logout')
 def logout():
     return render_template('logout.html')

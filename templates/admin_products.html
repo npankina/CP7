@@ -36,6 +36,20 @@
         </div>
     </div>
 
+    <!-- Добавляем поле поиска -->
+    <div class="search-container">
+        <input type="text" id="product-search" placeholder="Поиск товаров...">
+        <select id="search-filter">
+            <option value="all" id="search_all">Все поля</option>
+            <option value="name" id="search_name">По названию</option>
+            <option value="category" id="search_category">По категории</option>
+            <option value="description" id="search_description">По описанию</option>
+            <option value="price" id="search_price">По цене</option>
+            <option value="stock" id="search_stock">По количеству</option>
+        </select>
+        <button id="search-btn">Найти</button>
+    </div>
+
 
     <!-- Таблица товаров -->
     <div class="table-container ">
